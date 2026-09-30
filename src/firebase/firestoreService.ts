@@ -233,3 +233,34 @@ export async function markNotificationReadInFirestore(userId: string, notifId: s
   const ref = doc(db, 'users', userId, 'notifications', notifId);
   await updateDoc(ref, { read: true });
 }
+
+// Bulk save current app state to Firestore
+export async function saveAllUserDataToFirestore(
+  userId: string,
+  data: {
+    budgets: BudgetCategory[];
+    goals: FinancialGoal[];
+    transactions: Transaction[];
+    accounts: FinancialAccount[];
+  }
+) {
+  const batch = writeBatch(db);
+
+  data.budgets.forEach((b) => {
+    batch.set(doc(db, 'users', userId, 'budgets', b.id), b, { merge: true });
+  });
+
+  data.goals.forEach((g) => {
+    batch.set(doc(db, 'users', userId, 'goals', g.id), g, { merge: true });
+  });
+
+  data.transactions.forEach((t) => {
+    batch.set(doc(db, 'users', userId, 'transactions', t.id), t, { merge: true });
+  });
+
+  data.accounts.forEach((a) => {
+    batch.set(doc(db, 'users', userId, 'accounts', a.id), a, { merge: true });
+  });
+
+  await batch.commit();
+}

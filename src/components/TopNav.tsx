@@ -9,7 +9,8 @@ interface TopNavProps {
   onOpenPeriodFilter: () => void;
   onOpenExportReport: () => void;
   onOpenMobileNav: () => void;
-  onOpenAuthModal?: () => void;
+  onSaveToCloud?: () => void;
+  isSavingCloud?: boolean;
   notifications: NotificationItem[];
   onMarkNotificationRead: (id: string) => void;
   onOpenPreferences?: () => void;
@@ -22,11 +23,12 @@ export const TopNav: React.FC<TopNavProps> = ({
   onOpenPeriodFilter,
   onOpenExportReport,
   onOpenMobileNav,
-  onOpenAuthModal,
+  onSaveToCloud,
+  isSavingCloud = false,
   notifications,
   onMarkNotificationRead,
 }) => {
-  const { user, isOnline } = useAuth();
+  const { user } = useAuth();
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = notifications.filter((n) => !n.read).length;
 
@@ -172,52 +174,19 @@ export const TopNav: React.FC<TopNavProps> = ({
             )}
           </div>
 
-          {/* Cloud Sync Status Indicator */}
+          {/* Botão de Salvar na Nuvem */}
           <button
-            onClick={onOpenAuthModal}
-            className={`hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-full border text-[11px] font-medium transition-all cursor-pointer ${
-              user
-                ? 'bg-[#4edea3]/10 border-[#4edea3]/30 text-[#4edea3] hover:bg-[#4edea3]/20'
-                : 'bg-[#ffb2b7]/10 border-[#ffb2b7]/30 text-[#ffb2b7] hover:bg-[#ffb2b7]/20'
-            }`}
-            title={user ? 'Cloud Firestore: Conectado em tempo real' : 'Clique para autenticar no Firebase'}
+            onClick={onSaveToCloud}
+            disabled={isSavingCloud}
+            className="flex items-center gap-2 px-3 sm:px-3.5 py-1.5 rounded-lg bg-[#8083ff]/15 hover:bg-[#8083ff]/25 border border-[#8083ff]/40 text-[#c0c1ff] hover:text-[#dae2fd] transition-all duration-150 active:scale-[0.98] cursor-pointer shadow-sm text-body-sm font-medium disabled:opacity-50"
+            title="Salvar dados na nuvem"
           >
-            <span className={`material-symbols-outlined text-[15px] ${user ? 'text-[#4edea3]' : 'text-[#ffb2b7]'}`}>
-              {user ? 'cloud_done' : 'cloud_off'}
+            <span className={`material-symbols-outlined text-[18px] text-[#4edea3] ${isSavingCloud ? 'animate-spin' : ''}`}>
+              {isSavingCloud ? 'sync' : 'cloud_upload'}
             </span>
-            <span className="hidden md:inline">
-              {user ? 'Firestore Nuvem' : 'Entrar / Conectar'}
+            <span className="font-semibold text-[13px] whitespace-nowrap">
+              {isSavingCloud ? 'Salvando...' : 'Salvar na nuvem'}
             </span>
-          </button>
-
-          {/* User Profile / Auth Button */}
-          <button
-            onClick={onOpenAuthModal}
-            className="flex items-center gap-2.5 pl-1 sm:pl-2 p-1 rounded-xl hover:bg-[#171f33] transition-colors cursor-pointer text-left"
-          >
-            {user?.photoURL ? (
-              <img
-                alt={user.displayName || 'Utilizador'}
-                className="w-8 h-8 rounded-full border border-[#464554]/40 object-cover ring-1 ring-[#c0c1ff]/30"
-                src={user.photoURL}
-              />
-            ) : user ? (
-              <div className="w-8 h-8 rounded-full bg-[#8083ff]/20 border border-[#8083ff]/40 flex items-center justify-center text-[#c0c1ff] font-bold text-body-sm ring-1 ring-[#c0c1ff]/30">
-                {(user.displayName || user.email || 'U')[0].toUpperCase()}
-              </div>
-            ) : (
-              <div className="w-8 h-8 rounded-full bg-[#171f33] border border-[#464554]/40 flex items-center justify-center text-[#c7c4d7]">
-                <span className="material-symbols-outlined text-[18px]">account_circle</span>
-              </div>
-            )}
-            <div className="hidden xl:flex flex-col">
-              <span className="text-body-sm font-semibold text-[#dae2fd] leading-tight truncate max-w-[130px]">
-                {user ? user.displayName || (user.isAnonymous ? 'Convidado' : user.email?.split('@')[0]) : 'Iniciar Sessão'}
-              </span>
-              <span className="text-label-caps text-[#908fa0] leading-tight">
-                {user ? (user.isAnonymous ? 'Sessão Temporária' : 'Conta Sincronizada') : 'Nuvem Firebase'}
-              </span>
-            </div>
           </button>
         </div>
       </div>

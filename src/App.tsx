@@ -42,6 +42,7 @@ import { AuthModal } from './components/modals/AuthModal';
 
 // Firebase
 import { AuthProvider, useAuth } from './firebase/authContext';
+import { auth } from './firebase/config';
 import {
   seedUserDataIfEmpty,
   subscribeToUserData,
@@ -54,11 +55,13 @@ import {
   markNotificationReadInFirestore,
   addAccountToFirestore,
   resetUserDataInFirestore,
+  saveAllUserDataToFirestore,
 } from './firebase/firestoreService';
 import { formatCurrency } from './utils/formatters';
 
 function WealthFlowApp() {
-  const { user } = useAuth();
+  const { user, signInAsGuest } = useAuth();
+  const [isSavingCloud, setIsSavingCloud] = useState(false);
 
   // Navigation
   const [activeTab, setActiveTab] = useState<NavigationTab>('dashboard');
@@ -440,6 +443,33 @@ function WealthFlowApp() {
     }
   };
 
+  const handleSaveToCloud = async () => {
+    setIsSavingCloud(true);
+    try {
+      let activeUser = user;
+      if (!activeUser) {
+        await signInAsGuest();
+        activeUser = auth.currentUser;
+      }
+      if (activeUser) {
+        await saveAllUserDataToFirestore(activeUser.uid, {
+          budgets,
+          goals,
+          transactions,
+          accounts,
+        });
+        showToast('Dados salvos na nuvem com sucesso! ☁️');
+      } else {
+        showToast('Não foi possível conectar à nuvem.');
+      }
+    } catch (err) {
+      console.error('Erro ao salvar na nuvem:', err);
+      showToast('Erro ao sincronizar com a nuvem.');
+    } finally {
+      setIsSavingCloud(false);
+    }
+  };
+
   return (
     <div className="flex min-h-screen bg-[#0b1326] text-[#dae2fd]">
       {/* Toast Notification */}
@@ -476,7 +506,8 @@ function WealthFlowApp() {
           onOpenPeriodFilter={() => setIsPeriodModalOpen(true)}
           onOpenExportReport={() => setIsExportModalOpen(true)}
           onOpenMobileNav={() => setIsMobileNavOpen(true)}
-          onOpenAuthModal={() => setIsAuthModalOpen(true)}
+          onSaveToCloud={handleSaveToCloud}
+          isSavingCloud={isSavingCloud}
           notifications={notifications}
           onMarkNotificationRead={handleMarkNotificationRead}
         />

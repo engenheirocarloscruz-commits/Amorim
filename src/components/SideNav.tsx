@@ -20,8 +20,6 @@ export const SideNav: React.FC<SideNavProps> = ({
     { id: 'dashboard', label: 'Dashboard Geral', icon: 'dashboard' },
     { id: 'budgets', label: 'Orçamentos & Metas', icon: 'pie_chart' },
     { id: 'transactions', label: 'Lançamentos', icon: 'receipt_long' },
-    { id: 'accounts', label: 'Contas & Cartões', icon: 'account_balance_wallet' },
-    { id: 'settings', label: 'Configurações', icon: 'settings' },
     { id: 'support', label: 'Ajuda & Suporte', icon: 'help_outline' },
   ];
 
