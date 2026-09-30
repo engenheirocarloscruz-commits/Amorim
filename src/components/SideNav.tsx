@@ -18,6 +18,11 @@ export const SideNav: React.FC<SideNavProps> = ({
 }) => {
   const navItems: { id: NavigationTab; label: string; icon: string }[] = [
     { id: 'dashboard', label: 'Dashboard Geral', icon: 'dashboard' },
+    { id: 'budgets', label: 'Orçamentos & Metas', icon: 'pie_chart' },
+    { id: 'transactions', label: 'Lançamentos', icon: 'receipt_long' },
+    { id: 'accounts', label: 'Contas & Cartões', icon: 'account_balance_wallet' },
+    { id: 'settings', label: 'Configurações', icon: 'settings' },
+    { id: 'support', label: 'Ajuda & Suporte', icon: 'help_outline' },
   ];
 
   return (
@@ -32,7 +37,7 @@ export const SideNav: React.FC<SideNavProps> = ({
 
       {/* Side Nav Sidebar */}
       <aside
-        className={`fixed top-0 left-0 h-screen w-60 z-50 bg-[#131b2e] border-r border-[#464554]/30 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 w-64 z-50 bg-[#131b2e] border-r border-[#464554]/30 flex flex-col justify-between p-4 transition-transform duration-300 ease-in-out lg:static lg:h-screen lg:sticky lg:top-0 lg:translate-x-0 lg:shrink-0 ${
           isMobileOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >

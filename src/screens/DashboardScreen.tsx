@@ -57,21 +57,15 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
   selectedPeriod,
   onOpenNewTransaction,
 }) => {
-  const [sortBy, setSortBy] = useState<'amount' | 'percentage' | 'name'>('amount');
-
   const totalSpent = budgets.reduce((acc, b) => acc + b.spent, 0);
   const totalIncome = transactions
     .filter((t) => t.type === 'income')
-    .reduce((acc, t) => acc + t.amount, 0) || 14500;
+    .reduce((acc, t) => acc + t.amount, 0);
 
-  // Sort expense categories
-  const sortedExpenses = [...budgets].sort((a, b) => {
-    if (sortBy === 'amount') return b.spent - a.spent;
-    if (sortBy === 'percentage') return (b.spent / (b.limit || 1)) - (a.spent / (a.limit || 1));
-    return a.name.localeCompare(b.name);
-  });
+  // Sort expense categories by amount
+  const sortedExpenses = [...budgets].sort((a, b) => b.spent - a.spent);
 
-  const maxExpense = Math.max(...sortedExpenses.map((e) => e.spent), 1);
+  const maxExpense = Math.max(...sortedExpenses.map((e) => e.spent), 0);
   const displayMonth = selectedPeriod ? selectedPeriod.replace(/\s*\d{4}/g, '').trim() : 'Março';
 
   return (
@@ -173,40 +167,6 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
               </p>
             </div>
           </div>
-
-          {/* Filtros de Ordenação */}
-          <div className="flex items-center gap-1.5 p-1 rounded-lg bg-[#0b1326] border border-[#464554]/30 self-start sm:self-auto">
-            <button
-              onClick={() => setSortBy('amount')}
-              className={`px-3 py-1.5 rounded-md text-body-sm font-medium transition-colors cursor-pointer ${
-                sortBy === 'amount'
-                  ? 'bg-[#1e273e] text-[#dae2fd] shadow-sm'
-                  : 'text-[#908fa0] hover:text-[#dae2fd]'
-              }`}
-            >
-              Maior Valor
-            </button>
-            <button
-              onClick={() => setSortBy('percentage')}
-              className={`px-3 py-1.5 rounded-md text-body-sm font-medium transition-colors cursor-pointer ${
-                sortBy === 'percentage'
-                  ? 'bg-[#1e273e] text-[#dae2fd] shadow-sm'
-                  : 'text-[#908fa0] hover:text-[#dae2fd]'
-              }`}
-            >
-              % do Teto
-            </button>
-            <button
-              onClick={() => setSortBy('name')}
-              className={`px-3 py-1.5 rounded-md text-body-sm font-medium transition-colors cursor-pointer ${
-                sortBy === 'name'
-                  ? 'bg-[#1e273e] text-[#dae2fd] shadow-sm'
-                  : 'text-[#908fa0] hover:text-[#dae2fd]'
-              }`}
-            >
-              Nome
-            </button>
-          </div>
         </div>
 
         {/* Lista de Barras Horizontais */}
@@ -220,7 +180,7 @@ export const DashboardScreen: React.FC<DashboardScreenProps> = ({
             };
 
             const percentageOfTotal = totalSpent > 0 ? (item.spent / totalSpent) * 100 : 0;
-            const barWidth = Math.max(5, Math.round((item.spent / maxExpense) * 100));
+            const barWidth = maxExpense > 0 && item.spent > 0 ? Math.max(3, Math.round((item.spent / maxExpense) * 100)) : 0;
 
             return (
               <div

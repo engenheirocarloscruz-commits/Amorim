@@ -31,46 +31,67 @@ import {
 // Seed default data for new users if they have no records
 export async function seedUserDataIfEmpty(userId: string) {
   try {
-    const txCol = collection(db, 'users', userId, 'transactions');
-    const snap = await getDocs(txCol);
+    const budgetCol = collection(db, 'users', userId, 'budgets');
+    const snap = await getDocs(budgetCol);
 
     if (snap.empty) {
       const batch = writeBatch(db);
 
-      // Budgets
+      // Budgets (zeroed)
       INITIAL_BUDGETS.forEach((b) => {
         const ref = doc(db, 'users', userId, 'budgets', b.id);
         batch.set(ref, b);
       });
 
-      // Transactions
-      INITIAL_TRANSACTIONS.forEach((t) => {
-        const ref = doc(db, 'users', userId, 'transactions', t.id);
-        batch.set(ref, t);
-      });
-
-      // Accounts
+      // Accounts (zeroed)
       INITIAL_ACCOUNTS.forEach((a) => {
         const ref = doc(db, 'users', userId, 'accounts', a.id);
         batch.set(ref, a);
       });
 
-      // Goals
+      // Goals (zeroed)
       INITIAL_GOALS.forEach((g) => {
         const ref = doc(db, 'users', userId, 'goals', g.id);
         batch.set(ref, g);
-      });
-
-      // Notifications
-      INITIAL_NOTIFICATIONS.forEach((n) => {
-        const ref = doc(db, 'users', userId, 'notifications', n.id);
-        batch.set(ref, n);
       });
 
       await batch.commit();
     }
   } catch (err) {
     console.warn('Erro ao inicializar dados do utilizador no Firestore:', err);
+  }
+}
+
+// Reset all user data in Firestore to completely zeroed state
+export async function resetUserDataInFirestore(userId: string) {
+  try {
+    const batch = writeBatch(db);
+
+    // Delete existing transactions
+    const txSnap = await getDocs(collection(db, 'users', userId, 'transactions'));
+    txSnap.forEach((d) => batch.delete(d.ref));
+
+    // Reset budgets to zero
+    INITIAL_BUDGETS.forEach((b) => {
+      const ref = doc(db, 'users', userId, 'budgets', b.id);
+      batch.set(ref, b);
+    });
+
+    // Reset accounts to zero
+    INITIAL_ACCOUNTS.forEach((a) => {
+      const ref = doc(db, 'users', userId, 'accounts', a.id);
+      batch.set(ref, a);
+    });
+
+    // Reset goals to zero
+    INITIAL_GOALS.forEach((g) => {
+      const ref = doc(db, 'users', userId, 'goals', g.id);
+      batch.set(ref, g);
+    });
+
+    await batch.commit();
+  } catch (err) {
+    console.error('Erro ao redefinir dados no Firestore:', err);
   }
 }
 

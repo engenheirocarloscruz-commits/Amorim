@@ -53,6 +53,7 @@ import {
   depositToGoalInFirestore,
   markNotificationReadInFirestore,
   addAccountToFirestore,
+  resetUserDataInFirestore,
 } from './firebase/firestoreService';
 import { formatCurrency } from './utils/formatters';
 
@@ -68,36 +69,65 @@ function WealthFlowApp() {
     return saved ? saved.replace(/\s*\d{4}/g, '').trim() || 'Março' : 'Março';
   });
 
-  // Core Data States
+  // Core Data States - Starts completely zeroed
   const [budgets, setBudgets] = useState<BudgetCategory[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_BUDGETS;
     const saved = localStorage.getItem('wealthflow_budgets');
     return saved ? JSON.parse(saved) : INITIAL_BUDGETS;
   });
 
   const [goals, setGoals] = useState<FinancialGoal[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_GOALS;
     const saved = localStorage.getItem('wealthflow_goals');
     return saved ? JSON.parse(saved) : INITIAL_GOALS;
   });
 
   const [transactions, setTransactions] = useState<Transaction[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_TRANSACTIONS;
     const saved = localStorage.getItem('wealthflow_transactions');
     return saved ? JSON.parse(saved) : INITIAL_TRANSACTIONS;
   });
 
   const [accounts, setAccounts] = useState<FinancialAccount[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_ACCOUNTS;
     const saved = localStorage.getItem('wealthflow_accounts');
     return saved ? JSON.parse(saved) : INITIAL_ACCOUNTS;
   });
 
   const [deposits, setDeposits] = useState<GoalDeposit[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_DEPOSITS;
     const saved = localStorage.getItem('wealthflow_deposits');
     return saved ? JSON.parse(saved) : INITIAL_DEPOSITS;
   });
 
   const [notifications, setNotifications] = useState<NotificationItem[]>(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) return INITIAL_NOTIFICATIONS;
     const saved = localStorage.getItem('wealthflow_notifications');
     return saved ? JSON.parse(saved) : INITIAL_NOTIFICATIONS;
   });
+
+  // Startup zero-reset migration
+  useEffect(() => {
+    const isZeroed = localStorage.getItem('wealthflow_zeroed_v2');
+    if (!isZeroed) {
+      localStorage.setItem('wealthflow_zeroed_v2', 'true');
+      setBudgets(INITIAL_BUDGETS);
+      setGoals(INITIAL_GOALS);
+      setTransactions([]);
+      setAccounts(INITIAL_ACCOUNTS);
+      setDeposits([]);
+      setNotifications([]);
+      if (user) {
+        resetUserDataInFirestore(user.uid).catch(console.error);
+      }
+    }
+  }, [user]);
 
   // Toast feedback state
   const [toastMessage, setToastMessage] = useState<string | null>(null);
@@ -386,7 +416,7 @@ function WealthFlowApp() {
     showToast(`Aporte de ${formatCurrency(amount)} realizado e sincronizado! 🎉`);
   };
 
-  const handleResetData = () => {
+  const handleResetData = async () => {
     setBudgets(INITIAL_BUDGETS);
     setGoals(INITIAL_GOALS);
     setTransactions(INITIAL_TRANSACTIONS);
@@ -394,7 +424,11 @@ function WealthFlowApp() {
     setDeposits(INITIAL_DEPOSITS);
     setNotifications(INITIAL_NOTIFICATIONS);
     localStorage.clear();
-    showToast('Dados restaurados para os valores padrão!');
+    localStorage.setItem('wealthflow_zeroed_v2', 'true');
+    if (user) {
+      await resetUserDataInFirestore(user.uid);
+    }
+    showToast('Todos os valores foram zerados com sucesso!');
   };
 
   const handleMarkNotificationRead = (id: string) => {

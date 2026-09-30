@@ -37,9 +37,9 @@ export const BudgetsAndGoalsScreen: React.FC<BudgetsAndGoalsScreenProps> = ({
   const percentageConsumed = totalLimit > 0 ? (totalSpent / totalLimit) * 100 : 0;
   const remainingBudget = Math.max(0, totalLimit - totalSpent);
 
-  const totalIncome = transactions.length > 0
-    ? transactions.filter((t) => t.type === 'income').reduce((acc, t) => acc + t.amount, 0)
-    : 14500;
+  const totalIncome = transactions
+    .filter((t) => t.type === 'income')
+    .reduce((acc, t) => acc + t.amount, 0);
 
   // Filtered and sorted budgets
   const filteredBudgets = budgets.filter((b) =>
@@ -49,8 +49,8 @@ export const BudgetsAndGoalsScreen: React.FC<BudgetsAndGoalsScreenProps> = ({
 
   const sortedBudgets = [...filteredBudgets].sort((a, b) => {
     if (sortOrder === 'percentage') {
-      const pctA = a.spent / a.limit;
-      const pctB = b.spent / b.limit;
+      const pctA = a.limit > 0 ? a.spent / a.limit : 0;
+      const pctB = b.limit > 0 ? b.spent / b.limit : 0;
       return pctB - pctA;
     }
     if (sortOrder === 'name') {
