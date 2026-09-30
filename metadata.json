@@ -1,0 +1,6 @@
+{
+  "name": "WealthFlow - Gestão Doméstica",
+  "description": "Gestão financeira doméstica, acompanhamento de orçamentos por categoria, limites de gastos e metas patrimoniais familiares.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

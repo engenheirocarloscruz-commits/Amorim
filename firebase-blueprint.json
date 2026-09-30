@@ -1,0 +1,115 @@
+{
+  "entities": {
+    "UserProfile": {
+      "title": "UserProfile",
+      "description": "Perfis de utilizadores autenticados",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "email": { "type": "string", "format": "email" },
+        "displayName": { "type": "string" },
+        "photoURL": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "email"]
+    },
+    "Transaction": {
+      "title": "Transaction",
+      "description": "Lançamentos financeiros de despesas, receitas e investimentos",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "description": { "type": "string" },
+        "category": { "type": "string" },
+        "amount": { "type": "number" },
+        "type": { "type": "string", "enum": ["expense", "income", "investment"] },
+        "date": { "type": "string" },
+        "account": { "type": "string" },
+        "paymentMethod": { "type": "string" },
+        "status": { "type": "string", "enum": ["settled", "pending"] },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "userId", "description", "category", "amount", "type", "date"]
+    },
+    "BudgetCategory": {
+      "title": "BudgetCategory",
+      "description": "Categorias de orçamento e limites mensais",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "subtitle": { "type": "string" },
+        "icon": { "type": "string" },
+        "spent": { "type": "number" },
+        "limit": { "type": "number" },
+        "colorTheme": { "type": "string" },
+        "statusBadge": { "type": "string" },
+        "statusType": { "type": "string" }
+      },
+      "required": ["id", "userId", "name", "spent", "limit"]
+    },
+    "FinancialAccount": {
+      "title": "FinancialAccount",
+      "description": "Contas bancárias, carteiras e cartões de crédito",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "name": { "type": "string" },
+        "institution": { "type": "string" },
+        "type": { "type": "string", "enum": ["checking", "credit", "investment"] },
+        "balance": { "type": "number" },
+        "limit": { "type": "number" },
+        "availableLimit": { "type": "number" },
+        "cardLastDigits": { "type": "string" },
+        "closingDay": { "type": "number" },
+        "dueDay": { "type": "number" },
+        "color": { "type": "string" }
+      },
+      "required": ["id", "userId", "name", "type", "balance"]
+    },
+    "FinancialGoal": {
+      "title": "FinancialGoal",
+      "description": "Metas financeiras e objetivos de poupança",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "userId": { "type": "string" },
+        "title": { "type": "string" },
+        "description": { "type": "string" },
+        "icon": { "type": "string" },
+        "currentAmount": { "type": "number" },
+        "targetAmount": { "type": "number" },
+        "monthlyDeposit": { "type": "number" },
+        "targetDate": { "type": "string" },
+        "color": { "type": "string" }
+      },
+      "required": ["id", "userId", "title", "currentAmount", "targetAmount"]
+    }
+  },
+  "firestore": {
+    "/users/{userId}": {
+      "schema": "UserProfile",
+      "description": "Perfil do utilizador autenticado"
+    },
+    "/users/{userId}/transactions/{transactionId}": {
+      "schema": "Transaction",
+      "description": "Transações financeiras do utilizador"
+    },
+    "/users/{userId}/budgets/{budgetId}": {
+      "schema": "BudgetCategory",
+      "description": "Orçamentos e limites por categoria do utilizador"
+    },
+    "/users/{userId}/accounts/{accountId}": {
+      "schema": "FinancialAccount",
+      "description": "Contas financeiras e cartões do utilizador"
+    },
+    "/users/{userId}/goals/{goalId}": {
+      "schema": "FinancialGoal",
+      "description": "Metas de poupança e investimentos do utilizador"
+    }
+  }
+}
